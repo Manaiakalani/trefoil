@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#ffffff" />
+    <title>trefoil</title>
+    <meta
+      name="description"
+      content="The original rainbow trefoil film, and a live 3D studio of the same knot."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <div id="viewport">
+      <div id="frame">
+        <video
+          id="film"
+          src="/source.mp4"
+          muted
+          playsinline
+          loop
+          preload="auto"
+          aria-label="Original trefoil film"
+        ></video>
+        <canvas id="stage" aria-label="Live trefoil" hidden></canvas>
+      </div>
+    </div>
+
+    <header class="mark" data-chrome>
+      <p class="word">trefoil</p>
+      <p class="aside">one loop, three crossings</p>
+    </header>
+
+    <div class="tools" data-chrome>
+      <div class="modes" role="tablist" aria-label="View">
+        <button id="mode-film" type="button" role="tab" aria-selected="true">Film</button>
+        <button id="mode-live" type="button" role="tab" aria-selected="false">Live</button>
+      </div>
+      <label class="spectrum">
+        <span>spectrum</span>
+        <input id="hue" type="range" min="0" max="1000" value="0" step="1" aria-label="Hue" />
+      </label>
+    </div>
+
+    <div class="dock" data-chrome>
+      <button id="play" type="button" aria-label="Pause" aria-pressed="true">
+        <svg id="icon-pause" viewBox="0 0 24 24" aria-hidden="true">
+          <rect x="6" y="5" width="4" height="14" rx="1" />
+          <rect x="14" y="5" width="4" height="14" rx="1" />
+        </svg>
+        <svg id="icon-play" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M8 5.5v13l11-6.5-11-6.5z" />
+        </svg>
+      </button>
+      <p class="clock">
+        <span id="time">00.0</span><span class="total"> / 22.9</span>
+      </p>
+      <div class="actions">
+        <button id="speed" type="button" aria-label="Playback speed">1×</button>
+        <button id="shot" type="button">Save frame</button>
+        <button id="full" type="button">Full screen</button>
+        <button id="help" type="button" aria-haspopup="dialog">Keys</button>
+      </div>
+    </div>
+
+    <input id="scrub" class="scrub" type="range" min="0" max="10000" value="0" step="1" aria-label="Playhead" data-chrome />
+
+    <dialog id="sheet" class="sheet">
+      <form method="dialog">
+        <p class="sheet-title">Keys</p>
+        <dl>
+          <div><dt>space</dt><dd>play or pause</dd></div>
+          <div><dt>f / l</dt><dd>film or live</dd></div>
+          <div><dt>← →</dt><dd>nudge time</dd></div>
+          <div><dt>[ ]</dt><dd>nudge spectrum</dd></div>
+          <div><dt>1 2 3</dt><dd>half, normal, double speed</dd></div>
+          <div><dt>s</dt><dd>save frame</dd></div>
+          <div><dt>0</dt><dd>reset camera (live)</dd></div>
+          <div><dt>h</dt><dd>hide chrome</dd></div>
+          <div><dt>?</dt><dd>this list</dd></div>
+        </dl>
+        <button type="submit" class="sheet-close">Close</button>
+      </form>
+    </dialog>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
