@@ -20,6 +20,9 @@ npm run preview
 
 - **Film** — the source clip at 1920×1080, 60 fps, 22.883s. This is the pixel-perfect path.
 - **Live** — a 3D trefoil fitted to that clip. Drag to orbit. Spectrum still shifts the candy colors.
+- **Knot / Word / Mark** — the same rainbow candy, different silhouette. Type a word or character, or drop a logo (PNG, JPEG, WebP, SVG, GIF). Transparent holes in a mark stay open.
+
+Live 3D loads only when you open Live. On phones the knot uses a lighter mesh, a lower pixel ratio, and a slower glow so the studio stays smooth.
 
 ## Controls
 
@@ -29,6 +32,7 @@ npm run preview
 | Scrub | Rainbow strip, or ← → |
 | Spectrum | Top-right slider, or `[` `]` |
 | Film / live | `F` / `L`, or the labels |
+| Knot / word / mark | `K` / `W` / `M` |
 | Speed | `1` `2` `3` for ½×, 1×, 1½× |
 | Save frame | `S` |
 | Reset camera | `0` or double-click (live) |
