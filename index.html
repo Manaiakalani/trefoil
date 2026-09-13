@@ -4,7 +4,11 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#ffffff" />
+    <meta name="color-scheme" content="light" />
     <title>trefoil</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <meta
       name="description"
       content="The original rainbow trefoil film, and a live 3D studio of the same knot."
@@ -12,7 +16,12 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@700;800&display=swap"
+      rel="preload"
+      as="style"
+      href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@600;700;800&display=swap"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@600;700;800&display=swap"
       rel="stylesheet"
     />
     <link rel="stylesheet" href="/src/style.css" />
@@ -34,9 +43,32 @@
     </div>
 
     <header class="mark" data-chrome>
-      <p class="word">trefoil</p>
-      <p class="aside">one loop, three crossings</p>
+      <h1 class="word" translate="no">trefoil</h1>
+      <p class="aside" id="aside">one loop, three crossings</p>
+      <div class="subjects" role="tablist" aria-label="Subject">
+        <button id="sub-knot" type="button" role="tab" aria-selected="true">Knot</button>
+        <button id="sub-word" type="button" role="tab" aria-selected="false">Word</button>
+        <button id="sub-mark" type="button" role="tab" aria-selected="false">Mark</button>
+      </div>
     </header>
+
+    <div class="composer" id="composer" data-chrome hidden>
+      <label class="sr-only" for="word-input">Word or character</label>
+      <input
+        id="word-input"
+        name="word"
+        type="text"
+        maxlength="48"
+        placeholder="Type a word or character…"
+        autocomplete="off"
+        spellcheck="false"
+        hidden
+      />
+      <label class="upload" id="upload-label" hidden>
+        <span id="upload-copy">Drop a logo, or choose a file</span>
+        <input id="file" type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml,image/gif" />
+      </label>
+    </div>
 
     <div class="tools" data-chrome>
       <div class="modes" role="tablist" aria-label="View">
@@ -59,25 +91,36 @@
           <path d="M8 5.5v13l11-6.5-11-6.5z" />
         </svg>
       </button>
-      <p class="clock">
+      <p class="clock" aria-live="off">
         <span id="time">00.0</span><span class="total"> / 22.9</span>
       </p>
       <div class="actions">
-        <button id="speed" type="button" aria-label="Playback speed">1×</button>
+        <button id="speed" type="button" aria-label="Speed 1×">1×</button>
         <button id="shot" type="button">Save frame</button>
         <button id="full" type="button">Full screen</button>
-        <button id="help" type="button" aria-haspopup="dialog">Keys</button>
+        <button id="help" type="button" aria-haspopup="dialog" aria-controls="sheet">Keys</button>
       </div>
     </div>
 
-    <input id="scrub" class="scrub" type="range" min="0" max="10000" value="0" step="1" aria-label="Playhead" data-chrome />
+    <label class="sr-only" for="scrub">Playhead</label>
+    <input
+      id="scrub"
+      class="scrub"
+      type="range"
+      min="0"
+      max="10000"
+      value="0"
+      step="1"
+      data-chrome
+    />
 
-    <dialog id="sheet" class="sheet">
+    <dialog id="sheet" class="sheet" aria-labelledby="sheet-title">
       <form method="dialog">
-        <p class="sheet-title">Keys</p>
+        <p class="sheet-title" id="sheet-title">Keys</p>
         <dl>
           <div><dt>space</dt><dd>play or pause</dd></div>
           <div><dt>f / l</dt><dd>film or live</dd></div>
+          <div><dt>k / w / m</dt><dd>knot, word, or mark</dd></div>
           <div><dt>← →</dt><dd>nudge time</dd></div>
           <div><dt>[ ]</dt><dd>nudge spectrum</dd></div>
           <div><dt>1 2 3</dt><dd>half, normal, double speed</dd></div>
