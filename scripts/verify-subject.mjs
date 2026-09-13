@@ -15,7 +15,7 @@ page.on('console', (m) => {
   if (m.type() === 'error') errors.push(m.text());
 });
 
-await page.goto('http://127.0.0.1:5173/?mode=live', { waitUntil: 'networkidle' });
+await page.goto('http://127.0.0.1:5173/', { waitUntil: 'networkidle' });
 await page.waitForTimeout(700);
 await page.screenshot({ path: path.join(out, 'subject-knot.png') });
 
@@ -39,7 +39,7 @@ const mobile = await browser.newPage({
   hasTouch: true,
 });
 mobile.on('pageerror', (e) => errors.push('mobile ' + e));
-await mobile.goto('http://127.0.0.1:5173/?mode=live&subject=word&text=✦', { waitUntil: 'networkidle' });
+await mobile.goto('http://127.0.0.1:5173/?subject=word&text=✦', { waitUntil: 'networkidle' });
 await mobile.waitForTimeout(900);
 await mobile.screenshot({ path: path.join(out, 'subject-mobile-word.png') });
 

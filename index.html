@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#ffffff" />
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; media-src 'self' blob:; connect-src 'self' ws: wss:; worker-src 'self' blob:; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
+      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' ws: wss:; worker-src 'self' blob:; base-uri 'self'; form-action 'self'"
     />
     <meta name="color-scheme" content="light" />
     <title>trefoil</title>
@@ -15,8 +15,25 @@
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <meta
       name="description"
-      content="The original rainbow trefoil film, and a live 3D studio of the same knot."
+      content="A live 3D rainbow trefoil — one loop, three crossings. Recast it as a word or a logo."
     />
+    <meta property="og:title" content="trefoil" />
+    <meta
+      property="og:description"
+      content="A live 3D rainbow trefoil — one loop, three crossings. Recast it as a word or a logo."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://manaiakalani.github.io/trefoil/" />
+    <meta property="og:image" content="https://manaiakalani.github.io/trefoil/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="trefoil" />
+    <meta
+      name="twitter:description"
+      content="A live 3D rainbow trefoil — one loop, three crossings."
+    />
+    <meta name="twitter:image" content="https://manaiakalani.github.io/trefoil/og.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -28,20 +45,19 @@
       href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@600;700;800&display=swap"
       rel="stylesheet"
     />
+    <link rel="preload" as="image" href="/poster.jpg" />
     <link rel="stylesheet" href="/src/style.css" />
   </head>
   <body>
     <div id="viewport">
       <div id="frame">
-        <video
-          id="film"
-          src="/source.mp4"
-          muted
-          playsinline
-          loop
-          preload="auto"
-          aria-label="Original trefoil film"
-        ></video>
+        <img
+          id="poster"
+          src="/poster.jpg"
+          width="1920"
+          height="1080"
+          alt="Rainbow trefoil knot on a white studio floor"
+        />
         <canvas id="stage" aria-label="Live trefoil" hidden></canvas>
       </div>
     </div>
@@ -75,10 +91,6 @@
     </div>
 
     <div class="tools" data-chrome>
-      <div class="modes" role="tablist" aria-label="View">
-        <button id="mode-film" type="button" role="tab" aria-selected="true">Film</button>
-        <button id="mode-live" type="button" role="tab" aria-selected="false">Live</button>
-      </div>
       <label class="spectrum">
         <span>spectrum</span>
         <input id="hue" type="range" min="0" max="1000" value="0" step="1" aria-label="Hue" />
@@ -123,13 +135,12 @@
         <p class="sheet-title" id="sheet-title">Keys</p>
         <dl>
           <div><dt>space</dt><dd>play or pause</dd></div>
-          <div><dt>f / l</dt><dd>film or live</dd></div>
           <div><dt>k / w / m</dt><dd>knot, word, or mark</dd></div>
           <div><dt>← →</dt><dd>nudge time</dd></div>
           <div><dt>[ ]</dt><dd>nudge spectrum</dd></div>
           <div><dt>1 2 3</dt><dd>half, normal, double speed</dd></div>
           <div><dt>s</dt><dd>save frame</dd></div>
-          <div><dt>0</dt><dd>reset camera (live)</dd></div>
+          <div><dt>0</dt><dd>reset camera</dd></div>
           <div><dt>h</dt><dd>hide chrome</dd></div>
           <div><dt>?</dt><dd>this list</dd></div>
         </dl>

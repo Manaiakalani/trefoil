@@ -2,7 +2,7 @@
   --paper: #ffffff;
   --ink: #16141c;
   --quiet: #534f5a;
-  --film: linear-gradient(
+  --rainbow: linear-gradient(
     90deg,
     #ff4d6a 0%,
     #ff8a4a 16%,
@@ -84,17 +84,12 @@ body.dropping #viewport::after {
 
 #frame {
   position: relative;
-  width: min(100vw, calc(100vh * 16 / 9));
-  height: min(100vh, calc(100vw * 9 / 16));
+  width: 100vw;
+  height: 100vh;
   background: #fff;
 }
 
-body[data-mode="live"] #frame {
-  width: 100vw;
-  height: 100vh;
-}
-
-#film,
+#poster,
 #stage {
   position: absolute;
   inset: 0;
@@ -103,7 +98,7 @@ body[data-mode="live"] #frame {
   display: block;
 }
 
-#film {
+#poster {
   object-fit: contain;
   background: #fff;
 }
@@ -117,7 +112,7 @@ body[data-mode="live"] #frame {
   cursor: grabbing;
 }
 
-#film[hidden],
+#poster[hidden],
 #stage[hidden] {
   display: none;
 }
@@ -168,12 +163,6 @@ body[data-mode="live"] #frame {
   gap: 0.35rem;
 }
 
-.modes {
-  display: flex;
-  gap: 0.35rem;
-}
-
-.modes button,
 .subjects button,
 .actions button,
 .sheet-close,
@@ -194,17 +183,14 @@ body[data-mode="live"] #frame {
   align-items: center;
 }
 
-.modes button,
 .subjects button {
   position: relative;
 }
 
-.modes button[aria-selected="true"],
 .subjects button[aria-selected="true"] {
   color: var(--ink);
 }
 
-.modes button[aria-selected="true"]::after,
 .subjects button[aria-selected="true"]::after {
   content: "";
   position: absolute;
@@ -217,7 +203,6 @@ body[data-mode="live"] #frame {
 }
 
 .actions button:hover,
-.modes button:hover,
 .subjects button:hover,
 #speed:hover,
 .sheet-close:hover {
@@ -240,7 +225,7 @@ body[data-mode="live"] #frame {
 .scrub {
   appearance: none;
   margin: 0;
-  background: var(--film);
+  background: var(--rainbow);
   cursor: pointer;
   border: 0;
 }
@@ -330,7 +315,6 @@ body.dropping .upload,
 .spectrum input:focus-visible,
 .scrub:focus-visible,
 #play:focus-visible,
-.modes button:focus-visible,
 .subjects button:focus-visible,
 .actions button:focus-visible,
 #speed:focus-visible,

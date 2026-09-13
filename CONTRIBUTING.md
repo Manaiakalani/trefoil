@@ -12,19 +12,19 @@ Open http://localhost:5173/
 ```bash
 npm run build
 npm run preview
+npm run smoke
 ```
 
 ## Project shape
 
 | Path | Role |
 | --- | --- |
-| `src/main.js` | App shell: film vs live, URL, keys, uploads |
+| `src/main.js` | App shell: URL, keys, uploads |
 | `src/scene.js` | Three.js studio |
 | `src/contours.js` | Silhouette tracing for words and marks |
-| `public/source.mp4` | Original film |
-| `.github/workflows/pages.yml` | GitHub Pages build |
+| `.github/workflows/pages.yml` | GitHub Pages build and smoke |
 
-Live 3D is loaded only when Live is opened.
+Do not add third-party video, film rips, or other media you do not have rights to.
 
 ## Pull requests
 
@@ -32,4 +32,4 @@ Keep changes scoped. Match the existing sentence-case chrome and the white candy
 
 ## Security
 
-See [SECURITY.md](SECURITY.md). Do not commit secrets, `.env` files, or large binaries besides the film and demo GIF.
+See [SECURITY.md](SECURITY.md). Do not commit secrets, `.env` files, or large binaries besides the demo GIF and stills.

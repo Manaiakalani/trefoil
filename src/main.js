@@ -1,13 +1,11 @@
 const viewport = document.getElementById('viewport');
-const film = document.getElementById('film');
 const canvas = document.getElementById('stage');
+const poster = document.getElementById('poster');
 const playBtn = document.getElementById('play');
 const timeEl = document.getElementById('time');
 const scrub = document.getElementById('scrub');
 const hue = document.getElementById('hue');
 const speedBtn = document.getElementById('speed');
-const modeFilm = document.getElementById('mode-film');
-const modeLive = document.getElementById('mode-live');
 const shotBtn = document.getElementById('shot');
 const fullBtn = document.getElementById('full');
 const helpBtn = document.getElementById('help');
@@ -32,7 +30,6 @@ const ASIDES = {
 };
 
 const state = {
-  mode: params.get('mode') === 'live' ? 'live' : 'film',
   playing: !reduceMotion,
   speed: Number(params.get('speed')) || 1,
   hue: params.has('hue') ? Number(params.get('hue')) : 0,
@@ -53,24 +50,31 @@ let last = 0;
 let urlTick = 0;
 let wordTimer = 0;
 
+const MAX_MARK_BYTES = 8 * 1024 * 1024;
+const ALLOWED_MARK_TYPES = new Set([
+  'image/png',
+  'image/jpeg',
+  'image/webp',
+  'image/gif',
+  'image/svg+xml',
+]);
+const ALLOWED_MARK_EXT = /\.(png|jpe?g|webp|gif|svg)$/i;
+
 function formatTime(t) {
   return t.toFixed(1).padStart(4, '0');
 }
 
 function duration() {
-  if (state.mode === 'film') return film.duration || 22.883333;
   return studio ? studio.duration : 22.883333;
 }
 
 function currentTime() {
-  if (state.mode === 'film') return film.currentTime || 0;
   return studio ? studio.getTime() : 0;
 }
 
 function setTime(t) {
   const d = duration();
   const wrapped = ((t % d) + d) % d;
-  film.currentTime = wrapped;
   if (studio) studio.setTime(wrapped);
 }
 
@@ -92,61 +96,19 @@ function setPlaying(next) {
   state.playing = next;
   playBtn.setAttribute('aria-pressed', String(next));
   playBtn.setAttribute('aria-label', next ? 'Pause' : 'Play');
-  film.playbackRate = state.speed;
-  if (state.mode === 'film') {
-    if (next) film.play().catch(() => {});
-    else film.pause();
-    stopLiveLoop();
-  } else {
-    film.pause();
-    if (next) startLiveLoop();
-    else stopLiveLoop();
-  }
-}
-
-async function setMode(mode) {
-  state.mode = mode;
-  const live = mode === 'live';
-  film.hidden = live;
-  canvas.hidden = !live;
-  document.body.dataset.mode = mode;
-  modeFilm.setAttribute('aria-selected', String(!live));
-  modeLive.setAttribute('aria-selected', String(live));
-  if (live) {
-    const s = await ensureStudio();
-    s.resize();
-    s.setOrbit(true);
-    s.setTime(film.currentTime || 0);
-    s.setHue(baseHue + state.hue);
-    s.resetView();
-  } else {
-    if (studio) {
-      studio.setOrbit(false);
-      film.currentTime = studio.getTime();
-    }
-    applyFilmHue();
-  }
-  setPlaying(state.playing);
-  syncComposer();
-  writeUrl();
-}
-
-function applyFilmHue() {
-  const deg = Math.round(state.hue * 360);
-  film.style.filter = deg ? `hue-rotate(${deg}deg)` : 'none';
+  if (next) startLiveLoop();
+  else stopLiveLoop();
 }
 
 function setHue(h) {
   state.hue = Math.min(1, Math.max(0, h));
   hue.value = String(Math.round(state.hue * 1000));
   hue.setAttribute('aria-valuetext', `${Math.round(state.hue * 360)} degrees`);
-  if (state.mode === 'film') applyFilmHue();
-  else if (studio) studio.setHue(baseHue + state.hue);
+  if (studio) studio.setHue(baseHue + state.hue);
 }
 
 function setSpeed(v) {
   state.speed = v;
-  film.playbackRate = v;
   const label = v === 1 ? '1×' : v === 0.5 ? '½×' : '1½×';
   speedBtn.textContent = label;
   speedBtn.setAttribute('aria-label', `Speed ${label}`);
@@ -166,20 +128,19 @@ function syncScrub() {
 
 function writeUrl() {
   const u = new URL(location.href);
-  u.searchParams.set('mode', state.mode);
   u.searchParams.set('t', currentTime().toFixed(2));
   u.searchParams.set('hue', state.hue.toFixed(3));
   u.searchParams.set('speed', String(state.speed));
   u.searchParams.set('subject', state.subject);
   if (state.subject === 'word' && state.text) u.searchParams.set('text', state.text);
   else u.searchParams.delete('text');
+  u.searchParams.delete('mode');
   history.replaceState(null, '', u);
 }
 
 function syncComposer() {
-  const live = state.mode === 'live';
-  const showWord = live && state.subject === 'word';
-  const showMark = live && state.subject === 'mark';
+  const showWord = state.subject === 'word';
+  const showMark = state.subject === 'mark';
   composer.hidden = !(showWord || showMark);
   wordInput.hidden = !showWord;
   uploadLabel.hidden = !showMark;
@@ -192,8 +153,7 @@ function syncComposer() {
 async function setSubject(kind, extra = {}) {
   state.subject = kind;
   if (typeof extra.text === 'string') state.text = extra.text;
-  if (kind !== 'knot' && state.mode !== 'live') await setMode('live');
-  else syncComposer();
+  syncComposer();
   const s = await ensureStudio();
   try {
     await s.setSubject({ kind, text: state.text, file: extra.file });
@@ -207,18 +167,8 @@ async function setSubject(kind, extra = {}) {
 }
 
 function saveFrame() {
-  const name = `trefoil-${state.mode}-${formatTime(currentTime()).replace('.', '-')}.png`;
-  if (state.mode === 'live' && studio) {
-    download(studio.capture(), name);
-    return;
-  }
-  const c = document.createElement('canvas');
-  c.width = film.videoWidth || 1920;
-  c.height = film.videoHeight || 1080;
-  const ctx = c.getContext('2d');
-  ctx.filter = film.style.filter || 'none';
-  ctx.drawImage(film, 0, 0, c.width, c.height);
-  download(c.toDataURL('image/png'), name);
+  if (!studio) return;
+  download(studio.capture(), `trefoil-${formatTime(currentTime()).replace('.', '-')}.png`);
 }
 
 function download(href, name) {
@@ -264,6 +214,17 @@ function stopLiveLoop() {
   raf = 0;
 }
 
+function assertMarkFile(file) {
+  if (file.size > MAX_MARK_BYTES) {
+    throw new Error('Use an image under 8 MB.');
+  }
+  const typed = file.type && ALLOWED_MARK_TYPES.has(file.type);
+  const named = ALLOWED_MARK_EXT.test(file.name || '');
+  if (!typed && !named) {
+    throw new Error('Use a PNG, JPEG, WebP, SVG, or GIF.');
+  }
+}
+
 wordInput.addEventListener('input', () => {
   state.text = wordInput.value;
   window.clearTimeout(wordTimer);
@@ -278,26 +239,6 @@ subWord.addEventListener('click', () => {
   if (window.matchMedia('(pointer: fine)').matches) wordInput.focus();
 });
 subMark.addEventListener('click', () => setSubject('mark'));
-const MAX_MARK_BYTES = 8 * 1024 * 1024;
-const ALLOWED_MARK_TYPES = new Set([
-  'image/png',
-  'image/jpeg',
-  'image/webp',
-  'image/gif',
-  'image/svg+xml',
-]);
-const ALLOWED_MARK_EXT = /\.(png|jpe?g|webp|gif|svg)$/i;
-
-function assertMarkFile(file) {
-  if (file.size > MAX_MARK_BYTES) {
-    throw new Error('Use an image under 8 MB.');
-  }
-  const typed = file.type && ALLOWED_MARK_TYPES.has(file.type);
-  const named = ALLOWED_MARK_EXT.test(file.name || '');
-  if (!typed && !named) {
-    throw new Error('Use a PNG, JPEG, WebP, SVG, or GIF.');
-  }
-}
 
 fileInput.addEventListener('change', () => {
   const file = fileInput.files && fileInput.files[0];
@@ -341,8 +282,6 @@ viewport.addEventListener('drop', (event) => {
 });
 
 playBtn.addEventListener('click', () => setPlaying(!state.playing));
-modeFilm.addEventListener('click', () => setMode('film'));
-modeLive.addEventListener('click', () => setMode('live'));
 speedBtn.addEventListener('click', cycleSpeed);
 shotBtn.addEventListener('click', saveFrame);
 fullBtn.addEventListener('click', () => toggleFullscreen().catch(() => {}));
@@ -366,9 +305,6 @@ scrub.addEventListener('input', () => {
 });
 
 hue.addEventListener('input', () => setHue(Number(hue.value) / 1000));
-film.addEventListener('timeupdate', () => {
-  if (state.mode === 'film') syncScrub();
-});
 
 window.addEventListener('keydown', (event) => {
   if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) {
@@ -378,9 +314,7 @@ window.addEventListener('keydown', (event) => {
   if (event.code === 'Space') {
     event.preventDefault();
     setPlaying(!state.playing);
-  } else if (k === 'f' || k === 'F') setMode('film');
-  else if (k === 'l' || k === 'L') setMode('live');
-  else if (k === 'k' || k === 'K') setSubject('knot');
+  } else if (k === 'k' || k === 'K') setSubject('knot');
   else if (k === 'w' || k === 'W') {
     setSubject('word', { text: state.text || wordInput.value });
     if (window.matchMedia('(pointer: fine)').matches) wordInput.focus();
@@ -401,15 +335,21 @@ window.addEventListener('keydown', (event) => {
   }
 });
 
-film.addEventListener('loadedmetadata', () => {
-  if (params.has('t')) setTime(Number(params.get('t')));
-  syncScrub();
-});
-
 setHue(state.hue);
 setSpeed(state.speed);
 wordInput.value = state.text;
-setMode(state.mode).then(() => {
-  if (state.subject !== 'knot') setSubject(state.subject, { text: state.text });
-  else syncComposer();
+syncComposer();
+
+ensureStudio().then((s) => {
+  if (params.has('t')) s.setTime(Number(params.get('t')));
+  s.setHue(baseHue + state.hue);
+  if (state.subject !== 'knot') {
+    return setSubject(state.subject, { text: state.text });
+  }
+}).then(() => {
+  if (poster) poster.hidden = true;
+  canvas.hidden = false;
+  if (studio) studio.resize();
+  setPlaying(state.playing);
+  syncScrub();
 });

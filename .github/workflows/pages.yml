@@ -21,6 +21,17 @@ jobs:
       - run: npm ci
       - run: npm audit --audit-level=high
       - run: npm run build
+      - run: npx playwright install --with-deps chromium
+      - run: npx vite preview --host 127.0.0.1 --port 4173 --strictPort &
+      - run: |
+          for i in $(seq 1 30); do
+            if curl -sf http://127.0.0.1:4173/ >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          echo "preview did not start" >&2
+          exit 1
+      - run: npm run smoke
+      - run: npm run build
         env:
           GITHUB_PAGES: '1'
       - uses: actions/upload-pages-artifact@v5

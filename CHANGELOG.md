@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.1.0
+
+- Live-only studio. Third-party video is not in the repository.
+- Poster still and Open Graph image from the WebGL reconstruction.
+- Playwright smoke check in CI.
+
 ## 1.0.1
 
 - Vite 8.2.2, Three.js 0.186.0
@@ -7,6 +13,4 @@
 
 ## 1.0.0
 
-- Film mode plays the source clip.
-- Live mode recasts the knot, a word, or a dropped mark in candy.
-- GitHub Pages deploy, MIT license, and security notes.
+- Candy studio with knot, word, and mark.

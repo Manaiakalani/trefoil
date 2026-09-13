@@ -136,7 +136,7 @@ export function createStudio(canvas) {
       shader.fragmentShader = shader.fragmentShader.replace(
         '#include <emissivemap_fragment>',
         `#include <emissivemap_fragment>
-         totalEmissiveRadiance += vColor * 0.52;`
+         totalEmissiveRadiance += vColor.rgb * 0.52;`
       );
     };
     return mat;

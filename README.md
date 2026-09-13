@@ -2,9 +2,11 @@
 
 [Live](https://manaiakalani.github.io/trefoil/) · [MIT](LICENSE)
 
-A 16:9 studio for a rainbow trefoil knot. Watch the original film pixel-for-pixel, or recast the same candy in Live — as the knot, as a word, or as a logo.
+A live 3D rainbow trefoil — one loop, three crossings. Drag it, recast it as a word, or drop a logo. Same candy studio.
 
-![Studio demo: film, live knot, then the word hello](docs/demo.gif)
+![Rainbow trefoil in the white studio](docs/social.png)
+
+![Studio demo](docs/demo.gif)
 
 ## Quick start
 
@@ -20,14 +22,6 @@ npm run build
 npm run preview
 ```
 
-## Views
-
-- **Film** — the source clip at 1920×1080, 60 fps, 22.883s.
-- **Live** — a WebGL trefoil you can drag. Spectrum still shifts the candy.
-- **Knot / Word / Mark** — the same rainbow candy, different silhouette. Type a word or character, or drop a PNG, JPEG, WebP, SVG, or GIF (max 8 MB).
-
-Live 3D loads only when you open Live. Phones use a lighter mesh.
-
 ## Controls
 
 | Action | |
@@ -35,24 +29,26 @@ Live 3D loads only when you open Live. Phones use a lighter mesh.
 | Play / pause | Space, or the round button |
 | Scrub | Rainbow strip, or ← → |
 | Spectrum | Top-right slider, or `[` `]` |
-| Film / live | `F` / `L` |
 | Knot / word / mark | `K` / `W` / `M` |
 | Speed | `1` `2` `3` for ½×, 1×, 1½× |
 | Save frame | `S` |
-| Reset camera | `0` or double-click (live) |
+| Reset camera | `0` or double-click |
 | Hide chrome | `H` |
 | Keys | `?` |
 
-URL query `mode`, `t`, `hue`, `speed`, `subject`, and `text` persist the view.
+URL query `t`, `hue`, `speed`, `subject`, and `text` persist the view.
 
 ## Deploy
 
-Static Vite app. GitHub Pages builds from `main` (site: [manaiakalani.github.io/trefoil](https://manaiakalani.github.io/trefoil/)).
+Static Vite app. GitHub Pages builds from `main`.
 
 ```bash
 npm run build
-npx vercel --yes
 ```
+
+## Rights
+
+This repository is original WebGL. It does not include third-party video, rips, or stills from anyone else’s clip. Poster, Open Graph, and demo frames are captured from the live studio. Keep reference media of your own off this tree.
 
 ## Security
 
@@ -60,4 +56,4 @@ No server, no accounts, no stored uploads. See [SECURITY.md](SECURITY.md).
 
 ## License
 
-[MIT](LICENSE). The film in `public/source.mp4` is the clip this studio was built from.
+[MIT](LICENSE) for the code and original assets in this repository.

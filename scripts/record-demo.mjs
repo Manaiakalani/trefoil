@@ -15,10 +15,9 @@ const context = await browser.newContext({
   recordVideo: { dir: rawDir, size: { width: 1280, height: 720 } },
 });
 const page = await context.newPage();
-await page.goto('http://127.0.0.1:5173/?mode=film&t=2', { waitUntil: 'networkidle' });
-await page.waitForTimeout(1800);
-await page.click('#mode-live');
-await page.waitForTimeout(900);
+await page.goto('http://127.0.0.1:5173/?t=4', { waitUntil: 'networkidle' });
+await page.waitForSelector('#stage', { state: 'visible' });
+await page.waitForTimeout(1200);
 const box = await page.locator('#stage').boundingBox();
 if (box) {
   const x = box.x + box.width * 0.5;
@@ -49,8 +48,6 @@ const result = spawnSync(
     '-y',
     '-i',
     input,
-    '-t',
-    '8',
     '-vf',
     'fps=12,scale=960:-1:flags=lanczos,split[s0][s1];[s0]palettegen=max_colors=128:reserve_transparent=0[p];[s1][p]paletteuse=dither=bayer',
     gif,
@@ -58,5 +55,4 @@ const result = spawnSync(
   { stdio: 'inherit' }
 );
 if (result.status !== 0) process.exit(result.status || 1);
-const mb = (fs.statSync(gif).size / (1024 * 1024)).toFixed(2);
-console.log('wrote', gif, mb, 'MB');
+console.log('wrote', gif, (fs.statSync(gif).size / (1024 * 1024)).toFixed(2), 'MB');

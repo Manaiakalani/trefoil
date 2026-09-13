@@ -20,19 +20,20 @@ async function run(name, options, visit) {
   await page.close();
 }
 
-await run('film-desktop', { viewport: { width: 1440, height: 900 } }, async (page) => {
-  await page.goto('http://127.0.0.1:5173/?mode=film', { waitUntil: 'networkidle' });
+await run('live-desktop', { viewport: { width: 1440, height: 900 } }, async (page) => {
+  await page.goto('http://127.0.0.1:5173/?t=15.2', { waitUntil: 'networkidle' });
+  await page.waitForSelector('#stage', { state: 'visible' });
   await page.waitForTimeout(800);
   const h1 = await page.locator('h1').textContent();
   const composer = await page.locator('#composer').isVisible();
-  await page.screenshot({ path: path.join(out, 'polish-film-desktop.png') });
-  fs.writeFileSync(path.join(out, 'polish-film.json'), JSON.stringify({ h1, composer }));
+  await page.screenshot({ path: path.join(out, 'polish-live-desktop.png') });
+  fs.writeFileSync(path.join(out, 'polish-live.json'), JSON.stringify({ h1, composer }));
 });
 
-await run('live-desktop', { viewport: { width: 1440, height: 900 } }, async (page) => {
-  await page.goto('http://127.0.0.1:5173/?mode=live', { waitUntil: 'networkidle' });
+await run('word-desktop', { viewport: { width: 1440, height: 900 } }, async (page) => {
+  await page.goto('http://127.0.0.1:5173/', { waitUntil: 'networkidle' });
+  await page.waitForSelector('#stage', { state: 'visible' });
   await page.waitForTimeout(900);
-  await page.screenshot({ path: path.join(out, 'polish-live-desktop.png') });
   await page.click('#sub-word');
   await page.waitForTimeout(200);
   await page.fill('#word-input', 'loop');
@@ -44,10 +45,8 @@ await run(
   'mobile',
   { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true },
   async (page) => {
-    await page.goto('http://127.0.0.1:5173/?mode=film', { waitUntil: 'networkidle' });
-    await page.waitForTimeout(700);
-    await page.screenshot({ path: path.join(out, 'polish-film-mobile.png') });
-    await page.click('#mode-live');
+    await page.goto('http://127.0.0.1:5173/', { waitUntil: 'networkidle' });
+    await page.waitForSelector('#stage', { state: 'visible' });
     await page.waitForTimeout(900);
     await page.screenshot({ path: path.join(out, 'polish-live-mobile.png') });
     await page.click('#sub-word');

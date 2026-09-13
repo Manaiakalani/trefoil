@@ -14,8 +14,7 @@ We aim to acknowledge reports within a week.
 | --- | --- |
 | Word field | Length-capped text, drawn to a canvas, then extruded. Not inserted as HTML. |
 | Mark upload / drop | PNG, JPEG, WebP, SVG, or GIF, max 8 MB. Drawn to a canvas. |
-| URL query | Mode, time, hue, speed, subject, and text. No remote fetches. |
-| Film | Local `public/source.mp4`. |
+| URL query | Time, hue, speed, subject, and text. No remote fetches. |
 
 ## Headers
 
