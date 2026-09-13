@@ -1,15 +1,19 @@
 # trefoil
 
-A 16:9 studio for the rainbow trefoil knot: the original film, pixel-for-pixel, and a live WebGL reconstruction you can turn in your hands.
+[Live](https://manaiakalani.github.io/trefoil/) · [MIT](LICENSE)
 
-## Run
+A 16:9 studio for a rainbow trefoil knot. Watch the original film pixel-for-pixel, or recast the same candy in Live — as the knot, as a word, or as a logo.
+
+![Studio demo: film, live knot, then the word hello](docs/demo.gif)
+
+## Quick start
 
 ```bash
 npm install
 npm run dev
 ```
 
-Open [http://localhost:5173](http://localhost:5173).
+Open http://localhost:5173/
 
 ```bash
 npm run build
@@ -18,11 +22,11 @@ npm run preview
 
 ## Views
 
-- **Film** — the source clip at 1920×1080, 60 fps, 22.883s. This is the pixel-perfect path.
-- **Live** — a 3D trefoil fitted to that clip. Drag to orbit. Spectrum still shifts the candy colors.
-- **Knot / Word / Mark** — the same rainbow candy, different silhouette. Type a word or character, or drop a logo (PNG, JPEG, WebP, SVG, GIF). Transparent holes in a mark stay open.
+- **Film** — the source clip at 1920×1080, 60 fps, 22.883s.
+- **Live** — a WebGL trefoil you can drag. Spectrum still shifts the candy.
+- **Knot / Word / Mark** — the same rainbow candy, different silhouette. Type a word or character, or drop a PNG, JPEG, WebP, SVG, or GIF (max 8 MB).
 
-Live 3D loads only when you open Live. On phones the knot uses a lighter mesh, a lower pixel ratio, and a slower glow so the studio stays smooth.
+Live 3D loads only when you open Live. Phones use a lighter mesh.
 
 ## Controls
 
@@ -31,28 +35,29 @@ Live 3D loads only when you open Live. On phones the knot uses a lighter mesh, a
 | Play / pause | Space, or the round button |
 | Scrub | Rainbow strip, or ← → |
 | Spectrum | Top-right slider, or `[` `]` |
-| Film / live | `F` / `L`, or the labels |
+| Film / live | `F` / `L` |
 | Knot / word / mark | `K` / `W` / `M` |
 | Speed | `1` `2` `3` for ½×, 1×, 1½× |
 | Save frame | `S` |
 | Reset camera | `0` or double-click (live) |
 | Hide chrome | `H` |
-| Full screen | Full screen button |
 | Keys | `?` |
 
-Drag on the live knot to turn it. URL query `mode`, `t`, `hue`, and `speed` persist the view.
+URL query `mode`, `t`, `hue`, `speed`, `subject`, and `text` persist the view.
 
 ## Deploy
 
-Static Vite app. `public/source.mp4` is the original film.
+Static Vite app. GitHub Pages builds from `main` (site: [manaiakalani.github.io/trefoil](https://manaiakalani.github.io/trefoil/)).
 
 ```bash
 npm run build
 npx vercel --yes
 ```
 
-GitHub Pages builds from `main` via `.github/workflows/pages.yml` (`base` `/trefoil/`).
+## Security
 
-## Source
+No server, no accounts, no stored uploads. See [SECURITY.md](SECURITY.md).
 
-The film is the user-supplied clip. Live mode is a trefoil tube (Wikipedia hypotrochoid) with poses fitted per-frame against that film. Geometry, hue, and glow follow the source; they will not be pixel-identical in live view.
+## License
+
+[MIT](LICENSE). The film in `public/source.mp4` is the clip this studio was built from.

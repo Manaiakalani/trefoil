@@ -1,0 +1,25 @@
+name: Bug
+description: Something does not work as expected
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What did you see, and what did you expect?
+    validations:
+      required: true
+  - type: input
+    id: browser
+    attributes:
+      label: Browser
+      placeholder: Safari 18, Chrome 130…
+  - type: dropdown
+    id: mode
+    attributes:
+      label: Mode
+      options:
+        - Film
+        - Live / Knot
+        - Live / Word
+        - Live / Mark
