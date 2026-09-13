@@ -4,6 +4,15 @@
   "version": "1.0.0",
   "type": "module",
   "description": "Pixel-perfect rainbow trefoil film and a live 3D studio of the same knot.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Manaiakalani/trefoil.git"
+  },
+  "homepage": "https://manaiakalani.github.io/trefoil/",
+  "bugs": {
+    "url": "https://github.com/Manaiakalani/trefoil/issues"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",

@@ -278,9 +278,38 @@ subWord.addEventListener('click', () => {
   if (window.matchMedia('(pointer: fine)').matches) wordInput.focus();
 });
 subMark.addEventListener('click', () => setSubject('mark'));
+const MAX_MARK_BYTES = 8 * 1024 * 1024;
+const ALLOWED_MARK_TYPES = new Set([
+  'image/png',
+  'image/jpeg',
+  'image/webp',
+  'image/gif',
+  'image/svg+xml',
+]);
+const ALLOWED_MARK_EXT = /\.(png|jpe?g|webp|gif|svg)$/i;
+
+function assertMarkFile(file) {
+  if (file.size > MAX_MARK_BYTES) {
+    throw new Error('Use an image under 8 MB.');
+  }
+  const typed = file.type && ALLOWED_MARK_TYPES.has(file.type);
+  const named = ALLOWED_MARK_EXT.test(file.name || '');
+  if (!typed && !named) {
+    throw new Error('Use a PNG, JPEG, WebP, SVG, or GIF.');
+  }
+}
+
 fileInput.addEventListener('change', () => {
   const file = fileInput.files && fileInput.files[0];
-  if (file) setSubject('mark', { file });
+  if (!file) return;
+  try {
+    assertMarkFile(file);
+  } catch (err) {
+    uploadCopy.textContent = err.message;
+    fileInput.value = '';
+    return;
+  }
+  setSubject('mark', { file });
 });
 
 function isFileDrag(event) {
@@ -301,7 +330,14 @@ viewport.addEventListener('drop', (event) => {
   event.preventDefault();
   document.body.classList.remove('dropping');
   const file = event.dataTransfer.files && event.dataTransfer.files[0];
-  if (file) setSubject('mark', { file });
+  if (!file) return;
+  try {
+    assertMarkFile(file);
+  } catch (err) {
+    uploadCopy.textContent = err.message;
+    return;
+  }
+  setSubject('mark', { file });
 });
 
 playBtn.addEventListener('click', () => setPlaying(!state.playing));
