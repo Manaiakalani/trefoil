@@ -4,12 +4,17 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#ffffff" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="trefoil" />
     <meta
       http-equiv="Content-Security-Policy"
       content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' ws: wss:; worker-src 'self' blob:; base-uri 'self'; form-action 'self'"
     />
     <meta name="color-scheme" content="light" />
     <title>trefoil</title>
+    <link rel="canonical" href="https://manaiakalani.github.io/trefoil/" />
+    <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
@@ -70,6 +75,11 @@
         <button id="sub-word" type="button" role="tab" aria-selected="false">Word</button>
         <button id="sub-mark" type="button" role="tab" aria-selected="false">Mark</button>
       </div>
+      <div class="families" id="families" role="tablist" aria-label="Knot">
+        <button id="knot-trefoil" type="button" role="tab" aria-selected="true">Trefoil</button>
+        <button id="knot-eight" type="button" role="tab" aria-selected="false">Eight</button>
+        <button id="knot-cinq" type="button" role="tab" aria-selected="false">Cinq</button>
+      </div>
     </header>
 
     <div class="composer" id="composer" data-chrome hidden>
@@ -112,11 +122,23 @@
       </p>
       <div class="actions">
         <button id="speed" type="button" aria-label="Speed 1×">1×</button>
-        <button id="shot" type="button">Save frame</button>
+        <button id="copy" type="button">Copy link</button>
+        <details class="menu" id="save-menu">
+          <summary>Save</summary>
+          <div class="menu-list">
+            <button id="shot" type="button">Frame</button>
+            <button id="export-glb" type="button">GLB</button>
+            <button id="export-stl" type="button">STL</button>
+          </div>
+        </details>
         <button id="full" type="button">Full screen</button>
         <button id="help" type="button" aria-haspopup="dialog" aria-controls="sheet">Keys</button>
       </div>
     </div>
+
+    <button class="hint" id="hint" type="button" data-chrome hidden>
+      Press <kbd>?</kbd> for keys
+    </button>
 
     <label class="sr-only" for="scrub">Playhead</label>
     <input
@@ -136,10 +158,12 @@
         <dl>
           <div><dt>space</dt><dd>play or pause</dd></div>
           <div><dt>k / w / m</dt><dd>knot, word, or mark</dd></div>
+          <div><dt>t / e / c</dt><dd>trefoil, eight, or cinq</dd></div>
           <div><dt>← →</dt><dd>nudge time</dd></div>
           <div><dt>[ ]</dt><dd>nudge spectrum</dd></div>
           <div><dt>1 2 3</dt><dd>half, normal, double speed</dd></div>
           <div><dt>s</dt><dd>save frame</dd></div>
+          <div><dt>l</dt><dd>copy link</dd></div>
           <div><dt>0</dt><dd>reset camera</dd></div>
           <div><dt>h</dt><dd>hide chrome</dd></div>
           <div><dt>?</dt><dd>this list</dd></div>

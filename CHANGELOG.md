@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.2.0
+
+- Copy link, GLB, and STL export.
+- Figure-eight and cinquefoil knots.
+- Installable web app manifest.
+- First-visit keys chip.
+
 ## 1.1.0
 
 - Live-only studio. Third-party video is not in the repository.

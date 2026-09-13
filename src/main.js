@@ -6,7 +6,11 @@ const timeEl = document.getElementById('time');
 const scrub = document.getElementById('scrub');
 const hue = document.getElementById('hue');
 const speedBtn = document.getElementById('speed');
+const copyBtn = document.getElementById('copy');
 const shotBtn = document.getElementById('shot');
+const glbBtn = document.getElementById('export-glb');
+const stlBtn = document.getElementById('export-stl');
+const saveMenu = document.getElementById('save-menu');
 const fullBtn = document.getElementById('full');
 const helpBtn = document.getElementById('help');
 const sheet = document.getElementById('sheet');
@@ -19,15 +23,21 @@ const uploadCopy = document.getElementById('upload-copy');
 const subKnot = document.getElementById('sub-knot');
 const subWord = document.getElementById('sub-word');
 const subMark = document.getElementById('sub-mark');
+const families = document.getElementById('families');
+const hint = document.getElementById('hint');
 
 const params = new URLSearchParams(location.search);
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const SPEEDS = [0.5, 1, 1.5];
+const KNOTS = ['trefoil', 'eight', 'cinq'];
 const ASIDES = {
-  knot: 'one loop, three crossings',
+  trefoil: 'one loop, three crossings',
+  eight: 'one loop, four crossings',
+  cinq: 'one loop, five crossings',
   word: 'letters in candy',
   mark: 'a logo in candy',
 };
+const HINT_KEY = 'trefoil.hint.v1';
 
 const state = {
   playing: !reduceMotion,
@@ -36,6 +46,7 @@ const state = {
   subject: ['knot', 'word', 'mark'].includes(params.get('subject'))
     ? params.get('subject')
     : 'knot',
+  knot: KNOTS.includes(params.get('knot')) ? params.get('knot') : 'trefoil',
   text: params.get('text') || '',
   scrubbing: false,
 };
@@ -49,6 +60,7 @@ let raf = 0;
 let last = 0;
 let urlTick = 0;
 let wordTimer = 0;
+let copyTimer = 0;
 
 const MAX_MARK_BYTES = 8 * 1024 * 1024;
 const ALLOWED_MARK_TYPES = new Set([
@@ -132,6 +144,8 @@ function writeUrl() {
   u.searchParams.set('hue', state.hue.toFixed(3));
   u.searchParams.set('speed', String(state.speed));
   u.searchParams.set('subject', state.subject);
+  if (state.subject === 'knot') u.searchParams.set('knot', state.knot);
+  else u.searchParams.delete('knot');
   if (state.subject === 'word' && state.text) u.searchParams.set('text', state.text);
   else u.searchParams.delete('text');
   u.searchParams.delete('mode');
@@ -141,22 +155,34 @@ function writeUrl() {
 function syncComposer() {
   const showWord = state.subject === 'word';
   const showMark = state.subject === 'mark';
+  const showKnot = state.subject === 'knot';
   composer.hidden = !(showWord || showMark);
   wordInput.hidden = !showWord;
   uploadLabel.hidden = !showMark;
-  aside.textContent = ASIDES[state.subject];
-  subKnot.setAttribute('aria-selected', String(state.subject === 'knot'));
-  subWord.setAttribute('aria-selected', String(state.subject === 'word'));
-  subMark.setAttribute('aria-selected', String(state.subject === 'mark'));
+  families.hidden = !showKnot;
+  aside.textContent = showKnot ? ASIDES[state.knot] : ASIDES[state.subject];
+  subKnot.setAttribute('aria-selected', String(showKnot));
+  subWord.setAttribute('aria-selected', String(showWord));
+  subMark.setAttribute('aria-selected', String(showMark));
+  for (const id of KNOTS) {
+    const btn = document.getElementById(`knot-${id}`);
+    if (btn) btn.setAttribute('aria-selected', String(showKnot && state.knot === id));
+  }
 }
 
 async function setSubject(kind, extra = {}) {
   state.subject = kind;
+  if (typeof extra.knot === 'string' && KNOTS.includes(extra.knot)) state.knot = extra.knot;
   if (typeof extra.text === 'string') state.text = extra.text;
   syncComposer();
   const s = await ensureStudio();
   try {
-    await s.setSubject({ kind, text: state.text, file: extra.file });
+    await s.setSubject({
+      kind,
+      knot: state.knot,
+      text: state.text,
+      file: extra.file,
+    });
   } catch (err) {
     uploadCopy.textContent = err.message || 'Could not use that file.';
     return;
@@ -168,14 +194,89 @@ async function setSubject(kind, extra = {}) {
 
 function saveFrame() {
   if (!studio) return;
-  download(studio.capture(), `trefoil-${formatTime(currentTime()).replace('.', '-')}.png`);
+  downloadHref(studio.capture(), `trefoil-${formatTime(currentTime()).replace('.', '-')}.png`);
+  closeSaveMenu();
 }
 
-function download(href, name) {
+function downloadHref(href, name) {
   const a = document.createElement('a');
   a.href = href;
   a.download = name;
   a.click();
+}
+
+function downloadBlob(blob, name) {
+  const href = URL.createObjectURL(blob);
+  downloadHref(href, name);
+  window.setTimeout(() => URL.revokeObjectURL(href), 1500);
+}
+
+function closeSaveMenu() {
+  if (saveMenu) saveMenu.open = false;
+}
+
+function stem() {
+  const tag = state.subject === 'knot' ? state.knot : state.subject;
+  return `trefoil-${tag}-${formatTime(currentTime()).replace('.', '-')}`;
+}
+
+async function exportModel(format) {
+  if (!studio) return;
+  closeSaveMenu();
+  const object = studio.exportObject();
+  try {
+    if (format === 'glb') {
+      const { GLTFExporter } = await import('three/addons/exporters/GLTFExporter.js');
+      const data = await new GLTFExporter().parseAsync(object, { binary: true });
+      downloadBlob(new Blob([data], { type: 'model/gltf-binary' }), `${stem()}.glb`);
+    } else {
+      const { STLExporter } = await import('three/addons/exporters/STLExporter.js');
+      const data = new STLExporter().parse(object, { binary: true });
+      downloadBlob(new Blob([data], { type: 'model/stl' }), `${stem()}.stl`);
+    }
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+async function copyLink() {
+  writeUrl();
+  const text = location.href;
+  try {
+    await navigator.clipboard.writeText(text);
+  } catch {
+    const input = document.createElement('input');
+    input.value = text;
+    document.body.appendChild(input);
+    input.select();
+    document.execCommand('copy');
+    input.remove();
+  }
+  copyBtn.textContent = 'Copied';
+  window.clearTimeout(copyTimer);
+  copyTimer = window.setTimeout(() => {
+    copyBtn.textContent = 'Copy link';
+  }, 1400);
+}
+
+function dismissHint() {
+  if (!hint || hint.hidden) return;
+  hint.hidden = true;
+  try {
+    localStorage.setItem(HINT_KEY, '1');
+  } catch {
+    /* private mode */
+  }
+}
+
+function showHint() {
+  if (!hint) return;
+  try {
+    if (localStorage.getItem(HINT_KEY)) return;
+  } catch {
+    /* show anyway */
+  }
+  hint.hidden = false;
 }
 
 async function toggleFullscreen() {
@@ -233,12 +334,18 @@ wordInput.addEventListener('input', () => {
   }, 180);
 });
 
-subKnot.addEventListener('click', () => setSubject('knot'));
+subKnot.addEventListener('click', () => setSubject('knot', { knot: state.knot }));
 subWord.addEventListener('click', () => {
   setSubject('word', { text: state.text || wordInput.value });
   if (window.matchMedia('(pointer: fine)').matches) wordInput.focus();
 });
 subMark.addEventListener('click', () => setSubject('mark'));
+
+for (const id of KNOTS) {
+  const btn = document.getElementById(`knot-${id}`);
+  if (!btn) continue;
+  btn.addEventListener('click', () => setSubject('knot', { knot: id }));
+}
 
 fileInput.addEventListener('change', () => {
   const file = fileInput.files && fileInput.files[0];
@@ -281,12 +388,27 @@ viewport.addEventListener('drop', (event) => {
   setSubject('mark', { file });
 });
 
+canvas.addEventListener('dblclick', () => {
+  if (studio) studio.resetView();
+});
+
 playBtn.addEventListener('click', () => setPlaying(!state.playing));
 speedBtn.addEventListener('click', cycleSpeed);
+copyBtn.addEventListener('click', () => copyLink().catch(() => {}));
 shotBtn.addEventListener('click', saveFrame);
+glbBtn.addEventListener('click', () => exportModel('glb'));
+stlBtn.addEventListener('click', () => exportModel('stl'));
 fullBtn.addEventListener('click', () => toggleFullscreen().catch(() => {}));
-helpBtn.addEventListener('click', () => sheet.showModal());
+helpBtn.addEventListener('click', () => {
+  dismissHint();
+  sheet.showModal();
+});
+hint?.addEventListener('click', dismissHint);
 document.addEventListener('fullscreenchange', syncFullscreenLabel);
+
+document.addEventListener('pointerdown', (event) => {
+  if (saveMenu?.open && !saveMenu.contains(event.target)) closeSaveMenu();
+});
 
 scrub.addEventListener('pointerdown', (event) => {
   state.scrubbing = true;
@@ -314,7 +436,10 @@ window.addEventListener('keydown', (event) => {
   if (event.code === 'Space') {
     event.preventDefault();
     setPlaying(!state.playing);
-  } else if (k === 'k' || k === 'K') setSubject('knot');
+  } else if (k === 'k' || k === 'K') setSubject('knot', { knot: state.knot });
+  else if (k === 't' || k === 'T') setSubject('knot', { knot: 'trefoil' });
+  else if (k === 'e' || k === 'E') setSubject('knot', { knot: 'eight' });
+  else if (k === 'c' || k === 'C') setSubject('knot', { knot: 'cinq' });
   else if (k === 'w' || k === 'W') {
     setSubject('word', { text: state.text || wordInput.value });
     if (window.matchMedia('(pointer: fine)').matches) wordInput.focus();
@@ -327,10 +452,12 @@ window.addEventListener('keydown', (event) => {
   else if (k === '2') setSpeed(1);
   else if (k === '3') setSpeed(1.5);
   else if (k === 's' || k === 'S') saveFrame();
+  else if (k === 'l' || k === 'L') copyLink().catch(() => {});
   else if (k === '0' && studio) studio.resetView();
   else if (k === 'h' || k === 'H') document.body.classList.toggle('clean');
   else if (k === '?' || k === '/') {
     event.preventDefault();
+    dismissHint();
     sheet.open ? sheet.close() : sheet.showModal();
   }
 });
@@ -340,16 +467,19 @@ setSpeed(state.speed);
 wordInput.value = state.text;
 syncComposer();
 
-ensureStudio().then((s) => {
-  if (params.has('t')) s.setTime(Number(params.get('t')));
-  s.setHue(baseHue + state.hue);
-  if (state.subject !== 'knot') {
-    return setSubject(state.subject, { text: state.text });
-  }
-}).then(() => {
-  if (poster) poster.hidden = true;
-  canvas.hidden = false;
-  if (studio) studio.resize();
-  setPlaying(state.playing);
-  syncScrub();
-});
+ensureStudio()
+  .then((s) => {
+    if (params.has('t')) s.setTime(Number(params.get('t')));
+    s.setHue(baseHue + state.hue);
+    if (state.subject !== 'knot' || state.knot !== 'trefoil') {
+      return setSubject(state.subject, { knot: state.knot, text: state.text });
+    }
+  })
+  .then(() => {
+    if (poster) poster.hidden = true;
+    canvas.hidden = false;
+    if (studio) studio.resize();
+    setPlaying(state.playing);
+    syncScrub();
+    showHint();
+  });

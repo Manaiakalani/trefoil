@@ -1,0 +1,22 @@
+name: Feature
+description: A change or addition to the studio
+labels: [enhancement]
+body:
+  - type: textarea
+    id: want
+    attributes:
+      label: What should change
+      description: What do you want to do that you cannot do now?
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Knot
+        - Word
+        - Mark
+        - Export
+        - Chrome
+        - Docs

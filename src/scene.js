@@ -35,6 +35,58 @@ class WikiTrefoil extends THREE.Curve {
   }
 }
 
+class WikiEight extends THREE.Curve {
+  getPoint(t, target = new THREE.Vector3()) {
+    const u = t * Math.PI * 2;
+    return target.set(
+      (2 + Math.cos(2 * u)) * Math.cos(3 * u),
+      (2 + Math.cos(2 * u)) * Math.sin(3 * u),
+      Math.sin(4 * u)
+    );
+  }
+}
+
+class WikiCinq extends THREE.Curve {
+  getPoint(t, target = new THREE.Vector3()) {
+    const u = t * Math.PI * 2;
+    return target.set(
+      (2 + Math.cos(5 * u)) * Math.cos(2 * u),
+      (2 + Math.cos(5 * u)) * Math.sin(2 * u),
+      Math.sin(5 * u)
+    );
+  }
+}
+
+class ScaledCurve extends THREE.Curve {
+  constructor(inner, scale) {
+    super();
+    this.inner = inner;
+    this.scale = scale;
+  }
+  getPoint(t, target = new THREE.Vector3()) {
+    this.inner.getPoint(t, target);
+    return target.multiplyScalar(this.scale);
+  }
+}
+
+const KNOT_CURVES = {
+  trefoil: new WikiTrefoil(),
+  eight: new WikiEight(),
+  cinq: new WikiCinq(),
+};
+
+const _pathSample = new THREE.Vector3();
+function pathRadius(c) {
+  let max = 0;
+  for (let i = 0; i < 64; i++) {
+    c.getPoint(i / 64, _pathSample);
+    max = Math.max(max, _pathSample.length());
+  }
+  return max || 1;
+}
+
+const TREFOIL_PATH_R = pathRadius(KNOT_CURVES.trefoil);
+
 function candyColor(u, offset, sat, lit, out) {
   let h = (u + offset) % 1;
   if (h < 0) h += 1;
@@ -100,7 +152,7 @@ export function createStudio(canvas) {
   controls.maxPolarAngle = Math.PI * 0.48;
   controls.rotateSpeed = 0.55;
   controls.target.set(0, 0.04, 0);
-  controls.enabled = false;
+  controls.enabled = true;
   controls.update();
 
   const pmrem = new THREE.PMREMGenerator(renderer);
@@ -121,9 +173,11 @@ export function createStudio(canvas) {
 
   const _col = new THREE.Color();
   let kind = 'knot';
+  let knotId = 'trefoil';
   let wordText = 'Aa';
   let subjectGen = 0;
-  const curve = new WikiTrefoil();
+  let curve = KNOT_CURVES.trefoil;
+  let drawCurve = curve;
 
   function candyMaterial() {
     const mat = new THREE.MeshStandardMaterial({
@@ -199,8 +253,10 @@ export function createStudio(canvas) {
 
   function makeKnot() {
     const coarse = isCoarse();
+    const s = TREFOIL_PATH_R / pathRadius(curve);
+    drawCurve = Math.abs(s - 1) < 0.02 ? curve : new ScaledCurve(curve, s);
     const geo = new THREE.TubeGeometry(
-      curve,
+      drawCurve,
       coarse ? 180 : CONFIG.tubularSegments,
       CONFIG.tube,
       coarse ? 16 : CONFIG.radialSegments,
@@ -311,9 +367,13 @@ export function createStudio(canvas) {
     }
   }
 
-  async function setSubject({ kind: nextKind, text, file } = {}) {
+  async function setSubject({ kind: nextKind, knot: nextKnot, text, file } = {}) {
     const gen = ++subjectGen;
     if (nextKind) kind = nextKind;
+    if (nextKnot && KNOT_CURVES[nextKnot]) {
+      knotId = nextKnot;
+      curve = KNOT_CURVES[knotId];
+    }
     if (typeof text === 'string') wordText = text;
     let canvas = null;
     if (kind === 'word') canvas = await drawWordCanvas(wordText);
@@ -321,8 +381,10 @@ export function createStudio(canvas) {
     else if (kind === 'mark') canvas = await drawWordCanvas('Mark');
     if (gen !== subjectGen) return;
     clearSubject();
-    if (canvas) makeCast(canvas);
-    else {
+    if (canvas) {
+      drawCurve = curve;
+      makeCast(canvas);
+    } else {
       kind = 'knot';
       makeKnot();
     }
@@ -370,7 +432,7 @@ export function createStudio(canvas) {
       const N = 48;
       for (let i = 0; i < N; i++) {
         const t0 = i / N;
-        curve.getPoint(t0, _p);
+        drawCurve.getPoint(t0, _p);
         _p.applyMatrix4(knotGroup.matrixWorld);
         const wgt = Math.max(0, 1.4 - _p.y);
         candyColor(t0, CONFIG.hueOffset, CONFIG.sat, CONFIG.lit, _col);
@@ -472,7 +534,12 @@ export function createStudio(canvas) {
       glowClock = 1;
     },
     getKind: () => kind,
+    getKnot: () => knotId,
     setSubject,
+    exportObject() {
+      knotGroup.updateMatrixWorld(true);
+      return knotGroup;
+    },
     setOrbit(on) {
       controls.enabled = on;
     },

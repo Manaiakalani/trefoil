@@ -21,10 +21,19 @@ await page.waitForTimeout(600);
 const canvas = await page.locator('#stage').isVisible();
 if (!canvas) errors.push('stage canvas not visible');
 
+await page.click('#knot-eight');
+await page.waitForTimeout(500);
+if ((await page.locator('#knot-eight').getAttribute('aria-selected')) !== 'true') {
+  errors.push('eight knot not selected');
+}
+
 await page.click('#sub-word');
 await page.waitForTimeout(400);
 await page.fill('#word-input', 'ok');
 await page.waitForTimeout(800);
+
+if (!(await page.locator('#copy').isVisible())) errors.push('copy link missing');
+if (!(await page.locator('#save-menu').count())) errors.push('save menu missing');
 
 await browser.close();
 if (errors.length) {

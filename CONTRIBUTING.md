@@ -19,8 +19,8 @@ npm run smoke
 
 | Path | Role |
 | --- | --- |
-| `src/main.js` | App shell: URL, keys, uploads |
-| `src/scene.js` | Three.js studio |
+| `src/main.js` | App shell: URL, keys, uploads, export |
+| `src/scene.js` | Three.js studio and knot curves |
 | `src/contours.js` | Silhouette tracing for words and marks |
 | `.github/workflows/pages.yml` | GitHub Pages build and smoke |
 

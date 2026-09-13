@@ -126,11 +126,16 @@ body.dropping #viewport::after {
   max-width: min(28rem, calc(100vw - 11rem));
 }
 
-.subjects {
+.subjects,
+.families {
   display: flex;
   gap: 0.35rem;
   margin-top: 0.35rem;
   pointer-events: auto;
+}
+
+.families[hidden] {
+  display: none;
 }
 
 .word {
@@ -164,7 +169,9 @@ body.dropping #viewport::after {
 }
 
 .subjects button,
+.families button,
 .actions button,
+.menu summary,
 .sheet-close,
 #speed {
   appearance: none;
@@ -183,15 +190,18 @@ body.dropping #viewport::after {
   align-items: center;
 }
 
-.subjects button {
+.subjects button,
+.families button {
   position: relative;
 }
 
-.subjects button[aria-selected="true"] {
+.subjects button[aria-selected="true"],
+.families button[aria-selected="true"] {
   color: var(--ink);
 }
 
-.subjects button[aria-selected="true"]::after {
+.subjects button[aria-selected="true"]::after,
+.families button[aria-selected="true"]::after {
   content: "";
   position: absolute;
   left: 50%;
@@ -204,9 +214,73 @@ body.dropping #viewport::after {
 
 .actions button:hover,
 .subjects button:hover,
+.families button:hover,
+.menu summary:hover,
 #speed:hover,
 .sheet-close:hover {
   color: var(--ink);
+}
+
+.menu {
+  position: relative;
+}
+
+.menu summary {
+  list-style: none;
+}
+
+.menu summary::-webkit-details-marker {
+  display: none;
+}
+
+.menu[open] > summary {
+  color: var(--ink);
+}
+
+.menu-list {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 4px);
+  z-index: 5;
+  min-width: 7.5rem;
+  display: flex;
+  flex-direction: column;
+  background: var(--paper);
+  border: 1px solid var(--ink);
+  padding: 0.15rem 0;
+}
+
+.menu-list button {
+  width: 100%;
+  justify-content: flex-start;
+  min-height: 36px;
+}
+
+.hint {
+  position: fixed;
+  left: var(--pad);
+  bottom: calc(var(--pad-b) + 72px);
+  z-index: 4;
+  margin: 0;
+  padding: 0.5rem 0.9rem;
+  border: 1.5px solid var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+}
+
+.hint kbd {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-weight: 500;
+  font-size: 0.85em;
+}
+
+.hint[hidden] {
+  display: none;
 }
 
 .spectrum {
@@ -316,7 +390,10 @@ body.dropping .upload,
 .scrub:focus-visible,
 #play:focus-visible,
 .subjects button:focus-visible,
+.families button:focus-visible,
 .actions button:focus-visible,
+.menu summary:focus-visible,
+.hint:focus-visible,
 #speed:focus-visible,
 .sheet-close:focus-visible {
   outline: 2px solid var(--ink);
@@ -419,7 +496,7 @@ body.dropping .upload,
 
 .sheet dl div {
   display: grid;
-  grid-template-columns: 5.5rem 1fr;
+  grid-template-columns: 6.2rem 1fr;
   gap: 0.6rem;
   font-size: 0.88rem;
 }
@@ -446,6 +523,15 @@ body.dropping .upload,
 
   .mark {
     max-width: calc(100vw - 8.5rem);
+  }
+
+  .families button {
+    padding: 0 0.3rem;
+    letter-spacing: 0.1em;
+  }
+
+  .hint {
+    bottom: calc(var(--pad-b) + 118px);
   }
 
   .aside {

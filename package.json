@@ -1,10 +1,22 @@
 {
   "name": "trefoil",
   "private": true,
-  "version": "1.1.0",
+  "version": "1.2.0",
   "type": "module",
   "description": "A live 3D rainbow trefoil studio. Recast the knot as a word or a logo.",
   "license": "MIT",
+  "keywords": [
+    "threejs",
+    "webgl",
+    "trefoil",
+    "knot",
+    "generative-art",
+    "creative-coding",
+    "parametric"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Manaiakalani/trefoil.git"
