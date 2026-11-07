@@ -2,7 +2,7 @@
 
 [Live](https://manaiakalani.github.io/trefoil/) · [MIT](LICENSE)
 
-A live 3D rainbow trefoil — one loop, three crossings. Drag it, recast it as a word, or drop a logo. Same candy studio.
+A live 3D rainbow trefoil: one loop, three crossings. Drag it, recast it as a word, or drop a logo. Same candy studio.
 
 ![Rainbow trefoil in the white studio](docs/social.png)
 
